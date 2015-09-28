@@ -8,6 +8,7 @@ package BeanSession;
 import javax.ejb.Singleton;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import BeanEntity.*;
 
 /**
  *
@@ -16,7 +17,14 @@ import javax.annotation.PreDestroy;
 import com.pauware.pauware_engine._Core.*;
 import com.pauware.pauware_engine._Exception.*;
 import com.pauware.pauware_engine._Java_EE.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import javax.annotation.PostConstruct;
+import javax.ejb.Startup;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 
 final class Timeout_log {
 
@@ -33,8 +41,9 @@ final class Timeout_log {
 }
 
 @Singleton
+@Startup
 public class BCMS extends Timer_monitor implements FSC, PSC {
-
+    private BcmsSession _session;
     private java.util.LinkedList<Timeout_log> _timeout_log;
     // SCXML DATAMODEL
     private final long _negotiation_limit = 180000L; // 3 min.
@@ -137,6 +146,9 @@ public class BCMS extends Timer_monitor implements FSC, PSC {
     protected AbstractStatechart _Completion_of_objectives;
     protected AbstractStatechart _End_of_crisis;
     protected AbstractStatechart_monitor _bCMS_state_machine;
+    
+    @PersistenceContext(name="Crise")
+    private EntityManager _entity_manager;
 
     private void init_structure() throws Statechart_exception {
         _timeout_log = new java.util.LinkedList();
@@ -369,6 +381,16 @@ public class BCMS extends Timer_monitor implements FSC, PSC {
              * End of fake arguments
              */
             _bCMS_state_machine.fires(_Close, _Completion_of_objectives, _End_of_crisis);
+            
+            
+            _session = new BcmsSession();
+            DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+            Date today = Calendar.getInstance().getTime();        
+            String reportDate = df.format(today);
+            String namesession = this.getClass().getSimpleName();
+            _session.setSessionId(namesession+reportDate);
+            _entity_manager.persist(_session);
+
             _bCMS_state_machine.start();
         } catch (Statechart_exception e) {
             System.err.println(e.getMessage());

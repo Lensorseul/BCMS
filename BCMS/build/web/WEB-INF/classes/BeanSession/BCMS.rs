@@ -1,2 +1,0 @@
-BeanSession.Timeout_log
-BeanSession.BCMS
