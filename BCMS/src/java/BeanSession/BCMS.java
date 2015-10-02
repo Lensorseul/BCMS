@@ -382,7 +382,7 @@ public class BCMS extends Timer_monitor implements FSC, PSC {
              */
             _bCMS_state_machine.fires(_Close, _Completion_of_objectives, _End_of_crisis);
             
-            
+            //Initiatlisation of BCMS session
             _session = new BcmsSession();
             DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
             Date today = Calendar.getInstance().getTime();        
@@ -390,6 +390,9 @@ public class BCMS extends Timer_monitor implements FSC, PSC {
             String namesession = this.getClass().getSimpleName();
             _session.setSessionId(namesession+reportDate);
             _entity_manager.persist(_session);
+            
+            state_fire_truck_number(2);
+            state_police_vehicle_number(3);
 
             _bCMS_state_machine.start();
         } catch (Statechart_exception e) {
@@ -444,6 +447,8 @@ public class BCMS extends Timer_monitor implements FSC, PSC {
         _bCMS_state_machine.fires(_State_fire_truck_number, _Crisis_details_exchange, _Number_of_fire_truck_defined, true, this, "set_number_of_fire_truck_required", new Object[]{number_of_fire_truck_required});
         _bCMS_state_machine.fires(_State_fire_truck_number, _Number_of_police_vehicle_defined, _Route_plan_development, true, this, "set_number_of_fire_truck_required", new Object[]{number_of_fire_truck_required});
         _bCMS_state_machine.run_to_completion(_State_fire_truck_number);
+        _session.setNbTruckF(number_of_fire_truck_required);
+        _entity_manager.persist(_session);
     }
 
     @Override
@@ -451,6 +456,8 @@ public class BCMS extends Timer_monitor implements FSC, PSC {
         _bCMS_state_machine.fires(_State_police_vehicle_number, _Crisis_details_exchange, _Number_of_police_vehicle_defined, true, this, "set_number_of_police_vehicle_required", new Object[]{number_of_police_vehicle_required});
         _bCMS_state_machine.fires(_State_police_vehicle_number, _Number_of_fire_truck_defined, _Route_plan_development, true, this, "set_number_of_police_vehicle_required", new Object[]{number_of_police_vehicle_required});
         _bCMS_state_machine.run_to_completion(_State_police_vehicle_number);
+        _session.setNbTruckP(number_of_police_vehicle_required);
+        _entity_manager.persist(_session); 
     }
 
     @Override
