@@ -391,8 +391,11 @@ public class BCMS extends Timer_monitor implements FSC, PSC {
             _session.setSessionId(namesession+reportDate);
             _entity_manager.persist(_session);
             
-            state_fire_truck_number(2);
-            state_police_vehicle_number(3);
+            Integer countFT =  (Integer)_entity_manager.createNamedQuery("FireTruck.countFireTruck").getSingleResult();
+            Integer countPV =  (Integer)_entity_manager.createNamedQuery("PoliceVehicle.countPoliceVehicle").getSingleResult();
+
+            state_fire_truck_number(countFT);
+            state_police_vehicle_number(countPV);
 
             _bCMS_state_machine.start();
         } catch (Statechart_exception e) {
