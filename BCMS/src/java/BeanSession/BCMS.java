@@ -391,13 +391,21 @@ public class BCMS extends Timer_monitor implements FSC, PSC {
             _session.setSessionId(namesession+reportDate);
             _entity_manager.persist(_session);
             
-            Integer countFT =  (Integer)_entity_manager.createNamedQuery("FireTruck.countFireTruck").getSingleResult();
-            Integer countPV =  (Integer)_entity_manager.createNamedQuery("PoliceVehicle.countPoliceVehicle").getSingleResult();
-
-            state_fire_truck_number(countFT);
-            state_police_vehicle_number(countPV);
 
             _bCMS_state_machine.start();
+            
+            Long lcountFT =  (Long)_entity_manager.createNamedQuery("FireTruck.countFireTruck").getSingleResult();
+            Long lcountPV =  (Long)_entity_manager.createNamedQuery("PoliceVehicle.countPoliceVehicle").getSingleResult();
+            int countFT = (lcountFT).intValue();
+            int countPV = (lcountPV).intValue();
+
+
+            FSC_connection_request();
+            PSC_connection_request();
+            
+            state_fire_truck_number(countFT);
+            state_police_vehicle_number(countPV);
+            
         } catch (Statechart_exception e) {
             System.err.println(e.getMessage());
         }
@@ -438,11 +446,21 @@ public class BCMS extends Timer_monitor implements FSC, PSC {
     @Override
     public void FSC_connection_request() throws Statechart_exception {
         _bCMS_state_machine.run_to_completion(_FSC_connection_request);
+        Event event = new Event();
+        event.setSessionId(_session);
+        event.setEventName(_FSC_connection_request);
+        event.setExecutionTrace(_bCMS_state_machine.async_current_state());
+        _entity_manager.persist(event);
     }
 
     @Override
     public void PSC_connection_request() throws Statechart_exception {
         _bCMS_state_machine.run_to_completion(_PSC_connection_request);
+        Event event = new Event();
+        event.setSessionId(_session);
+        event.setEventName(_PSC_connection_request);
+        event.setExecutionTrace(_bCMS_state_machine.async_current_state());
+        _entity_manager.persist(event);
     }
 
     @Override
