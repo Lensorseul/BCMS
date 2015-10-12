@@ -19,8 +19,6 @@ public interface FSC {
 
     public void state_fire_truck_number(int number_of_fire_truck_required) throws Statechart_exception;
 
-    public void route_for_fire_trucks() throws Statechart_exception;
-
     public void FSC_agrees_about_fire_truck_route() throws Statechart_exception;
 
     public void FSC_agrees_about_police_vehicle_route() throws Statechart_exception;
@@ -44,4 +42,6 @@ public interface FSC {
     public void crisis_is_more_severe() throws Statechart_exception;
 
     public void crisis_is_less_severe() throws Statechart_exception;
+
+    public void route_for_fire_trucks(String route_name) throws Statechart_exception;
 }

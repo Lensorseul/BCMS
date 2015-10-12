@@ -19,7 +19,7 @@ public interface PSC {
 
     public void state_police_vehicle_number(int number_of_police_vehicle_required) throws Statechart_exception;
 
-    public void route_for_police_vehicles() throws Statechart_exception;
+    public void route_for_police_vehicles(String route_name) throws Statechart_exception;
 
     public void enough_police_vehicles_dispatched() throws Statechart_exception;
 

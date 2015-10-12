@@ -44,6 +44,14 @@ final class Timeout_log {
 @Startup
 public class BCMS extends Timer_monitor implements FSC, PSC {
     private BcmsSession _session;
+    private Route _last_fire_truck_route;
+    private Route _last_police_vehicle_route;
+    private String date(){
+        DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+            Date today = Calendar.getInstance().getTime();        
+            String reportDate = df.format(today);
+            return reportDate;
+    }
     private java.util.LinkedList<Timeout_log> _timeout_log;
     // SCXML DATAMODEL
     private final long _negotiation_limit = 180000L; // 3 min.
@@ -384,11 +392,9 @@ public class BCMS extends Timer_monitor implements FSC, PSC {
             
             //Initiatlisation of BCMS session
             _session = new BcmsSession();
-            DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
-            Date today = Calendar.getInstance().getTime();        
-            String reportDate = df.format(today);
-            String namesession = this.getClass().getSimpleName();
-            _session.setSessionId(namesession+reportDate);
+            
+            String namesession = this.getClass().getSimpleName() + date();
+            _session.setSessionId(namesession);
             _entity_manager.persist(_session);
             
 
@@ -405,6 +411,10 @@ public class BCMS extends Timer_monitor implements FSC, PSC {
             
             state_fire_truck_number(countFT);
             state_police_vehicle_number(countPV);
+            
+            //route_for_fire_trucks("Route1");
+            System.out.println("APRESS ENCORE");
+            //route_for_police_vehicles("Road2");
             
         } catch (Statechart_exception e) {
             System.err.println(e.getMessage());
@@ -448,7 +458,8 @@ public class BCMS extends Timer_monitor implements FSC, PSC {
         _bCMS_state_machine.run_to_completion(_FSC_connection_request);
         Event event = new Event();
         event.setSessionId(_session);
-        event.setEventName(_FSC_connection_request);
+        String name = _FSC_connection_request + date();
+        event.setEventName(name);
         event.setExecutionTrace(_bCMS_state_machine.async_current_state());
         _entity_manager.persist(event);
     }
@@ -458,7 +469,8 @@ public class BCMS extends Timer_monitor implements FSC, PSC {
         _bCMS_state_machine.run_to_completion(_PSC_connection_request);
         Event event = new Event();
         event.setSessionId(_session);
-        event.setEventName(_PSC_connection_request);
+        String name = _PSC_connection_request + date();
+        event.setEventName(name);
         event.setExecutionTrace(_bCMS_state_machine.async_current_state());
         _entity_manager.persist(event);
     }
@@ -482,13 +494,35 @@ public class BCMS extends Timer_monitor implements FSC, PSC {
     }
 
     @Override
-    public void route_for_fire_trucks() throws Statechart_exception {
-        _bCMS_state_machine.run_to_completion(_Route_for_fire_trucks);
+    public void route_for_fire_trucks(String route_name) throws Statechart_exception {
+        _last_fire_truck_route = null;
+        _last_fire_truck_route = _entity_manager.find(Route.class, route_name);// On construit un entity bean 'Route' avec sa clef 'route_name' ; on le cherche dans la base...
+        System.out.println("                        ");
+        System.out.println(_last_fire_truck_route);
+        if (_last_fire_truck_route != null) {
+            _bCMS_state_machine.run_to_completion(_Route_for_fire_trucks);
+            Event event = new Event();
+            event.setSessionId(_session);
+            String name = _Route_for_fire_trucks + date();
+            event.setEventName(name);
+            event.setExecutionTrace(_bCMS_state_machine.async_current_state());
+            _entity_manager.persist(event);
+        } else {
+            throw new Statechart_exception("Fire truck route " + route_name + " does not exist...");
+        }
     }
+    
 
     @Override
-    public void route_for_police_vehicles() throws Statechart_exception {
-        _bCMS_state_machine.run_to_completion(_Route_for_police_vehicles);
+    public void route_for_police_vehicles(String route_name) throws Statechart_exception {
+        _last_police_vehicle_route = null;
+        _last_police_vehicle_route = _entity_manager.find(Route.class, route_name); // On construit un entity bean 'Route' avec sa clef 'route_name' ; on le cherche dans la base...
+        if (_last_police_vehicle_route != null) {
+            _bCMS_state_machine.run_to_completion(_Route_for_police_vehicles);
+        } else {
+            throw new Statechart_exception("Police vehicle route " + route_name + " does not exist...");
+        }
+
     }
 
     @Override
