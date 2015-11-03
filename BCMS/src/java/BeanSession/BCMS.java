@@ -21,6 +21,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.ejb.Startup;
 import javax.persistence.EntityManager;
@@ -155,7 +156,7 @@ public class BCMS extends Timer_monitor implements FSC, PSC {
     protected AbstractStatechart _End_of_crisis;
     protected AbstractStatechart_monitor _bCMS_state_machine;
     
-    @PersistenceContext(name="Crise")
+    @PersistenceContext(name="BCMSPU")
     private EntityManager _entity_manager;
 
     private void init_structure() throws Statechart_exception {
@@ -405,7 +406,6 @@ public class BCMS extends Timer_monitor implements FSC, PSC {
             int countFT = (lcountFT).intValue();
             int countPV = (lcountPV).intValue();
 
-
             FSC_connection_request();
             PSC_connection_request();
             
@@ -460,8 +460,28 @@ public class BCMS extends Timer_monitor implements FSC, PSC {
         event.setSessionId(_session);
         String name = _FSC_connection_request + date();
         event.setEventName(name);
-        event.setExecutionTrace(_bCMS_state_machine.async_current_state());
+        event.setExecutionTrace(_bCMS_state_machine.current_state());
         _entity_manager.persist(event);
+        
+        List<FireTruck> listeFireTruck = _entity_manager.createNamedQuery("FireTruck.findAll").getResultList();
+        for(int i=0; i<listeFireTruck.size(); i++){
+            System.out.println(listeFireTruck.get(i));
+            _bCMS_state_machine.run_to_completion(_Fire_truck_dispatched);
+            
+            BcmsSessionFireTruck bcmsft = new BcmsSessionFireTruck();
+            bcmsft.setSessionId(_session);
+            bcmsft.setFireTruckName(listeFireTruck.get(i));
+            bcmsft.setFireTruckStatus("Idle");
+            bcmsft.setBsftId(date()+i);
+            _entity_manager.persist(bcmsft);
+            
+            Event eventt = new Event();
+            eventt.setSessionId(_session);
+            String namet = _Fire_truck_dispatched + date()+i;
+            eventt.setEventName(namet);
+            eventt.setExecutionTrace(_bCMS_state_machine.current_state());
+            _entity_manager.persist(eventt);       
+        }
     }
 
     @Override
@@ -471,7 +491,7 @@ public class BCMS extends Timer_monitor implements FSC, PSC {
         event.setSessionId(_session);
         String name = _PSC_connection_request + date();
         event.setEventName(name);
-        event.setExecutionTrace(_bCMS_state_machine.async_current_state());
+        event.setExecutionTrace(_bCMS_state_machine.current_state());
         _entity_manager.persist(event);
     }
 
@@ -505,7 +525,7 @@ public class BCMS extends Timer_monitor implements FSC, PSC {
             event.setSessionId(_session);
             String name = _Route_for_fire_trucks + date();
             event.setEventName(name);
-            event.setExecutionTrace(_bCMS_state_machine.async_current_state());
+            event.setExecutionTrace(_bCMS_state_machine.current_state());
             _entity_manager.persist(event);
         } else {
             throw new Statechart_exception("Fire truck route " + route_name + " does not exist...");
@@ -519,6 +539,12 @@ public class BCMS extends Timer_monitor implements FSC, PSC {
         _last_police_vehicle_route = _entity_manager.find(Route.class, route_name); // On construit un entity bean 'Route' avec sa clef 'route_name' ; on le cherche dans la base...
         if (_last_police_vehicle_route != null) {
             _bCMS_state_machine.run_to_completion(_Route_for_police_vehicles);
+            Event event = new Event();
+            event.setSessionId(_session);
+            String name = _Route_for_police_vehicles + date();
+            event.setEventName(name);
+            event.setExecutionTrace(_bCMS_state_machine.current_state());
+            _entity_manager.persist(event);
         } else {
             throw new Statechart_exception("Police vehicle route " + route_name + " does not exist...");
         }
@@ -557,6 +583,24 @@ public class BCMS extends Timer_monitor implements FSC, PSC {
         _bCMS_state_machine.fires(_Fire_truck_dispatched, _All_police_vehicles_dispatched, _All_police_vehicles_dispatched, this, "fire_truck_dispatched_less_than_number_of_fire_truck_required", null, this, "fire_trucks_dispatched_add", new Object[]{fire_truck});
         _bCMS_state_machine.fires(_Fire_truck_dispatched, _All_police_vehicles_dispatched, _All_police_vehicles_dispatched, this, "fire_truck_dispatched_less_than_number_of_fire_truck_required", null, this, "enough_fire_trucks_dispatched", null, AbstractStatechart.Reentrance);
         _bCMS_state_machine.run_to_completion(_Fire_truck_dispatched);
+        
+        FireTruck ft = new FireTruck();
+        ft = _entity_manager.find(FireTruck.class, fire_truck);
+        
+        if(ft != null){
+            Event event = new Event();
+            event.setSessionId(_session);
+            String name = _Fire_truck_dispatched + date();
+            event.setEventName(name);
+            event.setExecutionTrace(_bCMS_state_machine.current_state());
+            _entity_manager.persist(event);
+
+            BcmsSessionFireTruck bcmssft = new BcmsSessionFireTruck();
+            bcmssft.setSessionId(_session);
+            bcmssft.setBsftId(bcmssft.getClass().getSimpleName() + date());
+            bcmssft.setFireTruckName(ft);
+            
+        }   
     }
 
     @Override
