@@ -21,13 +21,14 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
- * @author franck
+ * @author berger
  */
 @Entity
 @Table(name = "BCMS_SESSION_FIRE_TRUCK")
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "BcmsSessionFireTruck.findAll", query = "SELECT b FROM BcmsSessionFireTruck b"),
+    @NamedQuery(name = "BcmsSessionFireTruck.findByFireTruckNameAndSessionName", query = "SELECT b FROM BcmsSessionFireTruck b WHERE b.fireTruckName = :fireTruckName and b.sessionId = :sessionId"),
     @NamedQuery(name = "BcmsSessionFireTruck.findByBsftId", query = "SELECT b FROM BcmsSessionFireTruck b WHERE b.bsftId = :bsftId"),
     @NamedQuery(name = "BcmsSessionFireTruck.findByFireTruckStatus", query = "SELECT b FROM BcmsSessionFireTruck b WHERE b.fireTruckStatus = :fireTruckStatus")})
 public class BcmsSessionFireTruck implements Serializable {
@@ -41,12 +42,12 @@ public class BcmsSessionFireTruck implements Serializable {
     @Size(max = 10)
     @Column(name = "FIRE_TRUCK_STATUS")
     private String fireTruckStatus;
-    @JoinColumn(name = "FIRE_TRUCK_NAME", referencedColumnName = "FIRE_TRUCK_NAME")
-    @ManyToOne
-    private FireTruck fireTruckName;
     @JoinColumn(name = "SESSION_ID", referencedColumnName = "SESSION_ID")
     @ManyToOne
     private BcmsSession sessionId;
+    @JoinColumn(name = "FIRE_TRUCK_NAME", referencedColumnName = "FIRE_TRUCK_NAME")
+    @ManyToOne
+    private FireTruck fireTruckName;
 
     public BcmsSessionFireTruck() {
     }
@@ -71,20 +72,20 @@ public class BcmsSessionFireTruck implements Serializable {
         this.fireTruckStatus = fireTruckStatus;
     }
 
-    public FireTruck getFireTruckName() {
-        return fireTruckName;
-    }
-
-    public void setFireTruckName(FireTruck fireTruckName) {
-        this.fireTruckName = fireTruckName;
-    }
-
     public BcmsSession getSessionId() {
         return sessionId;
     }
 
     public void setSessionId(BcmsSession sessionId) {
         this.sessionId = sessionId;
+    }
+
+    public FireTruck getFireTruckName() {
+        return fireTruckName;
+    }
+
+    public void setFireTruckName(FireTruck fireTruckName) {
+        this.fireTruckName = fireTruckName;
     }
 
     @Override

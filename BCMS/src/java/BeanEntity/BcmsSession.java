@@ -22,7 +22,7 @@ import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
- * @author franck
+ * @author berger
  */
 @Entity
 @Table(name = "BCMS_SESSION")
@@ -45,9 +45,9 @@ public class BcmsSession implements Serializable {
     @Column(name = "SESSION_ID")
     private String sessionId;
     @OneToMany(mappedBy = "sessionId")
-    private Collection<BcmsSessionPoliceVehicle> bcmsSessionPoliceVehicleCollection;
-    @OneToMany(mappedBy = "sessionId")
     private Collection<BcmsSessionFireTruck> bcmsSessionFireTruckCollection;
+    @OneToMany(mappedBy = "sessionId")
+    private Collection<BcmsSessionPoliceVehicle> bcmsSessionPoliceVehicleCollection;
     @OneToMany(mappedBy = "sessionId")
     private Collection<Event> eventCollection;
 
@@ -83,21 +83,21 @@ public class BcmsSession implements Serializable {
     }
 
     @XmlTransient
-    public Collection<BcmsSessionPoliceVehicle> getBcmsSessionPoliceVehicleCollection() {
-        return bcmsSessionPoliceVehicleCollection;
-    }
-
-    public void setBcmsSessionPoliceVehicleCollection(Collection<BcmsSessionPoliceVehicle> bcmsSessionPoliceVehicleCollection) {
-        this.bcmsSessionPoliceVehicleCollection = bcmsSessionPoliceVehicleCollection;
-    }
-
-    @XmlTransient
     public Collection<BcmsSessionFireTruck> getBcmsSessionFireTruckCollection() {
         return bcmsSessionFireTruckCollection;
     }
 
     public void setBcmsSessionFireTruckCollection(Collection<BcmsSessionFireTruck> bcmsSessionFireTruckCollection) {
         this.bcmsSessionFireTruckCollection = bcmsSessionFireTruckCollection;
+    }
+
+    @XmlTransient
+    public Collection<BcmsSessionPoliceVehicle> getBcmsSessionPoliceVehicleCollection() {
+        return bcmsSessionPoliceVehicleCollection;
+    }
+
+    public void setBcmsSessionPoliceVehicleCollection(Collection<BcmsSessionPoliceVehicle> bcmsSessionPoliceVehicleCollection) {
+        this.bcmsSessionPoliceVehicleCollection = bcmsSessionPoliceVehicleCollection;
     }
 
     @XmlTransient

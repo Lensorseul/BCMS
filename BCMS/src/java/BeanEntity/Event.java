@@ -21,7 +21,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
- * @author franck
+ * @author berger
  */
 @Entity
 @Table(name = "EVENT")
@@ -29,7 +29,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 @NamedQueries({
     @NamedQuery(name = "Event.findAll", query = "SELECT e FROM Event e"),
     @NamedQuery(name = "Event.findByEventName", query = "SELECT e FROM Event e WHERE e.eventName = :eventName"),
-    @NamedQuery(name = "Event.findByExecutionTrace", query = "SELECT e FROM Event e WHERE e.executionTrace = :executionTrace")})
+    @NamedQuery(name = "Event.findBySessionId", query = "SELECT e FROM Event e WHERE e.sessionId = :sessionId"),
+    @NamedQuery(name = "Event.findByExecutionTrace", query = "SELECT e FROM Event e WHERE e.executionTrace = :executionTrace"),
+    @NamedQuery(name = "Event.findByCaller", query = "SELECT e FROM Event e WHERE e.caller = :caller"),
+    @NamedQuery(name = "Event.countEventBySessionId", query = "SELECT count(e) FROM Event e WHERE e.sessionId = :sessionId")})
 public class Event implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
@@ -41,6 +44,9 @@ public class Event implements Serializable {
     @Size(max = 500)
     @Column(name = "EXECUTION_TRACE")
     private String executionTrace;
+    @Size(max = 4)
+    @Column(name = "CALLER")
+    private String caller;
     @JoinColumn(name = "SESSION_ID", referencedColumnName = "SESSION_ID")
     @ManyToOne
     private BcmsSession sessionId;
@@ -55,6 +61,13 @@ public class Event implements Serializable {
     public String getEventName() {
         return eventName;
     }
+    public String getEventNameAction() {
+        return eventName.split("[1-9]")[0];
+    }
+    public String getEventNameDate() {
+        int size = eventName.split("[a-z]").length;
+        return eventName.split("[a-z]")[size-1];
+    }
 
     public void setEventName(String eventName) {
         this.eventName = eventName;
@@ -66,6 +79,14 @@ public class Event implements Serializable {
 
     public void setExecutionTrace(String executionTrace) {
         this.executionTrace = executionTrace;
+    }
+
+    public String getCaller() {
+        return caller;
+    }
+
+    public void setCaller(String caller) {
+        this.caller = caller;
     }
 
     public BcmsSession getSessionId() {

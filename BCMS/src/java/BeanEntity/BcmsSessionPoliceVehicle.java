@@ -21,13 +21,14 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
- * @author franck
+ * @author berger
  */
 @Entity
 @Table(name = "BCMS_SESSION_POLICE_VEHICLE")
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "BcmsSessionPoliceVehicle.findAll", query = "SELECT b FROM BcmsSessionPoliceVehicle b"),
+    @NamedQuery(name = "BcmsSessionPoliceVehicle.findByPoliceVehicleNameAndSessionName", query = "SELECT b FROM BcmsSessionPoliceVehicle b WHERE b.policeVehicleName = :policeVehicleName and b.sessionId = :sessionId"),
     @NamedQuery(name = "BcmsSessionPoliceVehicle.findByBspvId", query = "SELECT b FROM BcmsSessionPoliceVehicle b WHERE b.bspvId = :bspvId"),
     @NamedQuery(name = "BcmsSessionPoliceVehicle.findByPoliceVehicleStatus", query = "SELECT b FROM BcmsSessionPoliceVehicle b WHERE b.policeVehicleStatus = :policeVehicleStatus")})
 public class BcmsSessionPoliceVehicle implements Serializable {
@@ -41,12 +42,12 @@ public class BcmsSessionPoliceVehicle implements Serializable {
     @Size(max = 10)
     @Column(name = "POLICE_VEHICLE_STATUS")
     private String policeVehicleStatus;
-    @JoinColumn(name = "POLICE_VEHICLE_NAME", referencedColumnName = "POLICE_VEHICLE_NAME")
-    @ManyToOne
-    private PoliceVehicle policeVehicleName;
     @JoinColumn(name = "SESSION_ID", referencedColumnName = "SESSION_ID")
     @ManyToOne
     private BcmsSession sessionId;
+    @JoinColumn(name = "POLICE_VEHICLE_NAME", referencedColumnName = "POLICE_VEHICLE_NAME")
+    @ManyToOne
+    private PoliceVehicle policeVehicleName;
 
     public BcmsSessionPoliceVehicle() {
     }
@@ -71,20 +72,20 @@ public class BcmsSessionPoliceVehicle implements Serializable {
         this.policeVehicleStatus = policeVehicleStatus;
     }
 
-    public PoliceVehicle getPoliceVehicleName() {
-        return policeVehicleName;
-    }
-
-    public void setPoliceVehicleName(PoliceVehicle policeVehicleName) {
-        this.policeVehicleName = policeVehicleName;
-    }
-
     public BcmsSession getSessionId() {
         return sessionId;
     }
 
     public void setSessionId(BcmsSession sessionId) {
         this.sessionId = sessionId;
+    }
+
+    public PoliceVehicle getPoliceVehicleName() {
+        return policeVehicleName;
+    }
+
+    public void setPoliceVehicleName(PoliceVehicle policeVehicleName) {
+        this.policeVehicleName = policeVehicleName;
     }
 
     @Override
